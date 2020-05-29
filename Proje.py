@@ -1,20 +1,5 @@
 import os
 
-# Dosyalari iceri aktarma
-
-
-def initialize_data():
-    with open("customer_data_file.txt", "r") as customer_data_file:
-        customer_data = [(line.strip()).split() for line in customer_data_file]
-
-    with open("staff_data_file.txt", "r") as staff_data_file:
-        staff_data = [(line.strip()).split() for line in staff_data_file]
-
-    with open("room_data_file.txt", "r") as room_data_file:
-        room_data = [(line.strip()).split() for line in room_data_file]
-
-    with open("feedback_data_file.txt", "r") as feedback_data_file:
-        feedback_data = [(line.strip()).split() for line in feedback_data_file]
 # Oda Numarasina Gore Musteri Bilgilerini Gosterme
 
 
@@ -23,13 +8,17 @@ def get_customer_by_room_number(data, information_list, room_to_customer):
     while True:
         room_number = input(
             "Bilgilerini gormek istediginiz oda numarasini giriniz:")
-        customer_id = room_to_customer[room_number]
         count = 0
-        for i in range(len(data)):
-            if data[i][0] == customer_id:
-                for j in range(len(data[i])):
-                    print("[{}] -> {}".format(information_list[j], data[i][j]))
-                    count = 1
+        try:
+            customer_id = room_to_customer[room_number]
+        except KeyError:
+            print("Arattiginiz oda bulunamadi.")
+        else:
+            for i in range(len(data)):
+                if data[i][0] == customer_id:
+                    for j in range(len(data[i])):
+                        print("[{}] -> {}".format(information_list[j], data[i][j]))
+                        count = 1
 
         if count == 0:
             print("Arattiginiz bilgi dogrultusunda birisi bulunamadi.")
@@ -67,8 +56,8 @@ def calculate_room_fee(room_types):
         room_type = input(
             "1-Kucuk / 80 TL \t 2-Orta / 100 TL \t 3-Buyuk / 150 TL \t 4-Luks / 180 TL \nOda Türünü Giriniz:")
         day_to_stay = input("Kalınacak Gun Sayısını Giriniz:")
-        print("{} Tipindeki Odada {} Gun Kalmanın Ücreti = {} TL" .format(
-            room_types[int(room_type)-1][0], day_to_stay, int(room_types[int(room_type)-1][3])*int(day_to_stay)))
+        print("{} Tipindeki Odada {} Gun Kalmanın Ücreti = {} TL" .format(room_types[int(
+            room_type)-1][2], day_to_stay, int(room_types[int(room_type)-1][1])*int(day_to_stay)))
 
         choose = int(
             input("1-Ana Menuye Don \t 2-Tekrar Ucret Hesapla\nLutfen seciminizi yapiniz:"))
@@ -297,7 +286,7 @@ def update_data(data, information_list, x):
                 if choose == 1:  # ID ve Oda Numarasi Degistirilemez Bilgi Olarak Ayarlanmistir
                     print("ID Degistirilemez.")
                     break
-                if x == 1 and choose == 7:
+                if x == 1 and choose == 8:
                     print("Oda Numarasi Degistirilemez.")
                     break
                 updated_info = input("\nBilgiyi giriniz:")
@@ -737,11 +726,17 @@ room_to_customer = {}
 room_types = [[1, 80, "KUCUK"], [2, 100, "ORTA"],
               [3, 150, "BUYUK"], [4, 180, "LUKS"]]
 
+with open("customer_data_file.txt", "r") as customer_data_file:
+    customer_data = [(line.strip()).split() for line in customer_data_file]
 
-def main():
-    read_room_to_customer()
-    initialize_data()
-    menus()
+with open("staff_data_file.txt", "r") as staff_data_file:
+    staff_data = [(line.strip()).split() for line in staff_data_file]
 
+with open("room_data_file.txt", "r") as room_data_file:
+    room_data = [(line.strip()).split() for line in room_data_file]
 
-main()
+with open("feedback_data_file.txt", "r") as feedback_data_file:
+    feedback_data = [(line.strip()).split() for line in feedback_data_file]
+
+read_room_to_customer()
+menus()
