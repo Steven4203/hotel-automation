@@ -1,5 +1,42 @@
 import os
 
+
+# room_to_customer dosyasini yeniden yazma
+def write_room_to_customer_file(room_to_customer):
+    with open("room_to_customer_file.txt", "w") as room_to_customer_file:
+        keys = list(room_to_customer.keys())
+        for i in range(len(keys)):
+            room_to_customer_file.write(
+                str(keys[i]) + " " + str(room_to_customer[keys[i]]) + "\n")
+
+# customer_data_file dosyasini yeniden yazma
+
+
+def write_customer_data_file(customer_data):
+    with open("customer_data_file.txt", "w") as customer_data_file:
+        for i in range(len(customer_data)):
+            for j in range(len(customer_data[i])):
+                customer_data_file.write(customer_data[i][j] + " ")
+            customer_data_file.write("\n")
+
+
+# Dosyalari Okuma
+
+def initialize_data():
+    with open("customer_data_file.txt", "r") as customer_data_file:
+        customer_data = [(line.strip()).split() for line in customer_data_file]
+
+    with open("staff_data_file.txt", "r") as staff_data_file:
+        staff_data = [(line.strip()).split() for line in staff_data_file]
+
+    with open("room_data_file.txt", "r") as room_data_file:
+        room_data = [(line.strip()).split() for line in room_data_file]
+
+    with open("feedback_data_file.txt", "r") as feedback_data_file:
+        feedback_data = [(line.strip()).split() for line in feedback_data_file]
+
+    return customer_data, staff_data, room_data, feedback_data
+
 # Oda Numarasina Gore Musteri Bilgilerini Gosterme
 
 
@@ -158,11 +195,7 @@ def add_customer(data):
     room_number = input("Musteriyi eklemek isteginiz odayi giriniz:")
     temp_data.append(room_number)
     data.append(temp_data)
-    with open("customer_data_file.txt", "w") as customer_data_file:
-        for i in range(len(data)):
-            for j in range(len(data[i])):
-                customer_data_file.write(data[i][j] + " ")
-            customer_data_file.write("\n")
+    write_customer_data_file(data)
 
     with open("room_to_customer_file.txt", "a") as room_to_customer_file:
         room_to_customer_file.write(
@@ -323,20 +356,35 @@ def update_data(data, information_list, x):
 
 # Silme Fonksiyonları +
 
+# ID Kontrolu Yapar
+
+
+def find_id(data, temp_id):
+    for i in range(len(data)):
+        if data[i][0] == temp_id:
+            return i
+    return None
+
+# Personelin Calistigi Bolumu "BOS" Yapar
+
+
+def remove_staffs_department_information(data, temp_id):
+    staff_id = find_id(data, temp_id)
+    if staff_id == None:
+        return False
+    else:
+        data[staff_id][5] = "BOS"
+        return True
+
 
 def remove_staff(data, information_list):
     while True:
         list_data(data, information_list)
-        index = input("Silmek istediginiz ID'yi giriniz:")
-        control = 0
-        for i in range(len(data)):  # ID Kontrolu Yapıp Personelin Calistigi Bolumu "BOS" Yapar
-            if data[i][0] == index:
-                data[i][5] = "BOS"
-                control = 1
-                break
+        temp_id = input("Silmek istediginiz ID'yi giriniz:")
+        is_staff_exist = remove_staffs_department_information(data, temp_id)
 
         # Dosyayi yeniden yazar
-        if control == 1:
+        if is_staff_exist:
             with open("staff_data_file.txt", "w") as staff_data_file:
                 for i in range(len(data)):
                     for j in range(len(data[i])):
@@ -349,100 +397,273 @@ def remove_staff(data, information_list):
             continue
 
 
+def remove_customers_room_information(data, temp_id):
+    customer_id = find_id(data, temp_id)
+    if customer_id == None:
+        return False
+    else:
+        data[customer_id][7] = "-"
+        return True
+
+
+def find_customers_room(customer_id, room_to_customer):
+    keys = list(room_to_customer.keys())
+    for i in range(len(keys)):
+        if int(room_to_customer[keys[i]]) == int(customer_id):
+            return keys[i]
+    return None
+
+
 def remove_customer(data, information_list, room_to_customer):
     while True:
         list_data(data, information_list)
-        index = input("Silmek istediginiz ID'yi giriniz:")
-        control = 0
-        # ID Kontrolu Yapıp Musterinin Oda Bilgisini Siler Fakat Diger Bilgilerini Tutar
-        for i in range(len(data)):
-            if data[i][0] == index:
-                data[i][7] = "-"
-                control = 1
-                break
-        if control == 1:  # Eger Oda Bulunursa Odadaki Musteri Bilgilerini Siler
-            keys = list(room_to_customer.keys())
-            values = list(room_to_customer.values())
-            for i in range(len(keys)):
-                if int(room_to_customer[keys[i]]) == int(index):
-                    room_to_customer.pop(keys[i])
-                    break
+        temp_id = input("Silmek istediginiz ID'yi giriniz:")
+        is_customer_exist = remove_customers_room_information(data, temp_id)
 
-           # Dosyayi yeniden yazar
-            with open("customer_data_file.txt", "w") as customer_data_file:
-                for i in range(len(data)):
-                    for j in range(len(data[i])):
-                        customer_data_file.write(data[i][j] + " ")
-                    customer_data_file.write("\n")
+        if is_customer_exist:
 
-            with open("room_to_customer_file.txt", "w") as room_to_customer_file:
-                keys = list(room_to_customer.keys())
-                values = list(room_to_customer.values())
-                for i in range(len(keys)):
-                    room_to_customer_file.write(
-                        str(keys[i]) + " " + str(values[i]) + "\n")
-            print("Bilgi basariyla Silindi. Menuye Donuluyor...")
-            break
-        else:
-            print("Arattiginiz ID Bulunamadi. Lutfen tekrar deneyiniz...")
-            continue
+            # Eger Oda Bulunursa Odadaki Musteri Bilgilerini Siler
+            room_id = find_customers_room(temp_id, room_to_customer)
+            room_to_customer.pop(room_id)
 
-
-def remove_room(data, information_list, room_to_customer, customer_data):
-    while True:
-        list_data(data, information_list)
-        index = input("Silmek istediginiz ID'yi giriniz:")
-        control = 0
-        for i in range(len(data)):  # ID Kontrolu Yapıp Odanın Bilgilerini Siler
-            if data[i][0] == index:
-                data[i][1] = "-"
-                data[i][2] = "-"
-                control = 1
-                break
-
-        if control == 1:  # Eger Oda Bulunursa Odadaki Musteri Bilgilerini Siler ve Musterinin Odasini "-" Olarak Isaretler
-            keys = list(room_to_customer.keys())
-            values = list(room_to_customer.values())
-            for i in range(len(keys)):
-                if int(room_to_customer[keys[i]]) == int(index):
-                    room_to_customer.pop(keys[i])
-                    break
-            for i in range(len(customer_data)):
-                if customer_data[i][7] == index:
-                    customer_data[i][7] = "-"
-                    break
-
-           # Dosyayi yeniden yazar
-            with open("room_data_file.txt", "w") as room_data_file:
-                for i in range(len(data)):
-                    for j in range(len(data[i])):
-                        room_data_file.write(data[i][j] + " ")
-                    room_data_file.write("\n")
-
-            with open("room_to_customer_file.txt", "w") as room_to_customer_file:
-
-                for i in range(len(keys)):
-                    room_to_customer_file.write(
-                        str(keys[i]) + " " + str(values[i]) + "\n")
-
-            with open("customer_data_file.txt", "w") as customer_data_file:
-                for i in range(len(customer_data)):
-                    for j in range(len(customer_data[i])):
-                        customer_data_file.write(customer_data[i][j] + " ")
-                    customer_data_file.write("\n")
+           # Dosyalari yeniden yazar
+            write_customer_data_file(data)
+            write_room_to_customer_file(room_to_customer)
 
             print("Bilgi basariyla Silindi. Menuye Donuluyor...")
             break
         else:
             print("Arattiginiz ID Bulunamadi. Lutfen tekrar deneyiniz...")
             continue
+
 
 # Menüler
 
 
-def menus():
+def get_customer_menu():
+    os.system('cls')
     while True:
+        # Isim ve Ust Cizgi
+        print("\t\t\t\t\t\t    Musteri Bolumu" +
+              "\n\t\t\t\t\t=======================================")
 
+        # Menu Maddeleri
+        for i in range(len(customer_menu)):
+            print("\t\t\t\t\t| [{}] {}{}|".format(
+                i+1, customer_menu[i], " "*(32-len(customer_menu[i]))))
+            quit_number = i+2
+
+        # Cikis
+        print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
+            quit_number, " "*(18)))
+
+        # Alt Cizgi
+        print("\t\t\t\t\t=======================================")
+
+        # Secim Bolumu
+        choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
+
+        if choose == 1:  # Musteri Ekleme
+            os.system('cls')
+            add_customer(customer_data)
+        elif choose == 2:  # Musteri Bilgisi Guncelleme
+            os.system('cls')
+            update_data(customer_data,
+                        customer_information_list, 1)
+        elif choose == 3:  # Musteri Aratma
+            os.system('cls')
+            search_data(customer_data, customer_information_list)
+        elif choose == 4:  # Musteri Listeleme
+            os.system('cls')
+            while True:
+                list_data(customer_data, customer_information_list)
+                choose_in_lists = input(
+                    "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
+                if int(choose_in_lists) == 1:
+                    break
+                elif int(choose_in_lists) == 2:
+                    continue
+                else:
+                    print(
+                        "Hatali secim yaptiniz. Ana menuye donuluyor...")
+                    break
+
+        elif choose == 5:  # Musteri Silme
+            os.system('cls')
+            remove_customer(
+                customer_data, customer_information_list, room_to_customer)
+        elif choose == 6:  # Oda Ucreti Hesapla
+            calculate_room_fee(room_types)
+        elif choose == 7:
+            print("\t\t\t\t\tAna menuye donuluyor...")
+            os.system('cls')
+            break
+        else:
+            print(
+                "\t\t\t\t\tHatali bir secim yaptiniz, secim ekranina yonlendiriliyorsunuz...")
+            os.system('cls')
+            continue
+
+
+def get_staff_menu():
+    os.system('cls')
+    while True:
+        # Isim ve Ust Cizgi
+        print("\t\t\t\t\t\t    Personel Bolumu" +
+              "\n\t\t\t\t\t=======================================")
+
+        # Menu Maddeleri
+        for i in range(len(staff_menu)):
+            print("\t\t\t\t\t| [{}] {}{}|".format(
+                i+1, staff_menu[i], " "*(32-len(staff_menu[i]))))
+            quit_number = i+2
+
+        # Cikis
+        print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
+            quit_number, " "*(18)))
+
+        # Alt Cizgi
+        print("\t\t\t\t\t=======================================")
+
+        # Secim Bolumu
+        choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
+
+        if choose == 1:  # Personel Listeleme
+            os.system('cls')
+            while True:
+                list_data(staff_data, staff_information_list)
+                choose_in_lists = input(
+                    "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
+                if int(choose_in_lists) == 1:
+                    break
+                elif int(choose_in_lists) == 2:
+                    continue
+                else:
+                    print(
+                        "Hatali secim yaptiniz. Ana menuye donuluyor...")
+                    break
+
+        elif choose == 2:  # Yeni Personel Ekleme
+            os.system('cls')
+            add_staff(staff_data)
+
+        elif choose == 3:  # Personel Bilgilerini Guncelleme
+            os.system('cls')
+            update_data(staff_data, staff_information_list, 2)
+
+        elif choose == 4:  # Personel Silme
+            os.system('cls')
+            remove_staff(staff_data, staff_information_list)
+
+        elif choose == 5:  # Personel Arama
+            os.system('cls')
+            search_data(staff_data, staff_information_list)
+
+        elif choose == 6:
+            print("\t\t\t\t\tAna menuye donuluyor...")
+            os.system('cls')
+            break
+
+        else:
+            print(
+                "\t\t\t\t\tHatali bir secim yaptiniz, secim ekranina yonlendiriliyorsunuz...")
+            os.system('cls')
+            continue
+
+
+def get_room_menu():
+    os.system('cls')
+    while True:
+        # Isim ve Ust Cizgi
+        print("\t\t\t\t\t\t       Oda Menusu" +
+              "\n\t\t\t\t\t=======================================")
+
+        # Menu Maddeleri
+        for i in range(len(room_menu)):
+            print("\t\t\t\t\t| [{}] {}{}|".format(
+                i+1, room_menu[i], " "*(32-len(room_menu[i]))))
+            quit_number = i+2
+
+        # Cikis
+        print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
+            quit_number, " "*(18)))
+
+        # Alt Cizgi
+        print("\t\t\t\t\t=======================================")
+
+        # Secim Bolumu
+        choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
+        if choose == 1:  # Odalari Listele
+            os.system('cls')
+            while True:
+                list_data(room_data, room_information_list)
+                choose_in_lists = input(
+                    "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
+                if int(choose_in_lists) == 1:
+                    break
+                elif int(choose_in_lists) == 2:
+                    continue
+                else:
+                    print(
+                        "Hatali secim yaptiniz. Ana menuye donuluyor...")
+                    break
+        elif choose == 2:  # Yeni Oda Ekle
+            os.system('cls')
+            add_room(room_data)
+        elif choose == 3:  # Oda Bilgisi Guncelle
+            os.system('cls')
+            update_data(room_data, room_information_list, 3)
+        elif choose == 4:  # Odadaki Musteri Bilgilerini Goruntule
+            os.system('cls')
+            get_customer_by_room_number(
+                customer_data, customer_information_list, room_to_customer)
+        elif choose == 5:
+            print("\t\t\t\t\tAna menuye donuluyor...")
+            os.system('cls')
+            break
+
+
+def get_feedback_menu():
+    os.system('cls')
+    while True:
+        # Isim ve Ust Cizgi
+        print("\t\t\t\t\t\t  Musteri Memnuniyeti" +
+              "\n\t\t\t\t\t=======================================")
+
+        # Menu Maddeleri
+        for i in range(len(feedback_menu)):
+            print("\t\t\t\t\t| [{}] {}{}|".format(
+                i+1, feedback_menu[i], " "*(32-len(feedback_menu[i]))))
+            quit_number = i+2
+
+        # Cikis
+        print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
+            quit_number, " "*(18)))
+
+        # Alt Cizgi
+        print("\t\t\t\t\t=======================================")
+
+        # Secim Bolumu
+        choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
+        if choose == 1:  # Geri Bildirim Formu Doldurma
+            os.system('cls')
+            fill_feedback_form(
+                feedback_data, feedback_information_list)
+        elif choose == 2:  # Geri Bildirim Formlarini Listeleme
+            os.system('cls')
+            list_feedback_forms(
+                feedback_data, feedback_information_list)
+        elif choose == 3:  # Memnuniyet Oranı
+            os.system('cls')
+            feedback_rate(feedback_data, feedback_information_list)
+        elif choose == 4:
+            print("\t\t\t\t\tAna menuye donuluyor...")
+            os.system('cls')
+            break
+
+
+def get_menus():
+    while True:
         # Isim ve Ust Cizgi
         print("\t\t\t\t\t\t    OTEL OTOMASYONU" +
               "\n\t\t\t\t\t=======================================")
@@ -464,228 +685,16 @@ def menus():
 
         # Musteri Menusu
         if choose == 1:
-            os.system('cls')
-            while True:
-                # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t    Musteri Bolumu" +
-                      "\n\t\t\t\t\t=======================================")
-
-                # Menu Maddeleri
-                for i in range(len(customer_menu)):
-                    print("\t\t\t\t\t| [{}] {}{}|".format(
-                        i+1, customer_menu[i], " "*(32-len(customer_menu[i]))))
-                    quit_number = i+2
-
-                # Cikis
-                print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
-                    quit_number, " "*(18)))
-
-                # Alt Cizgi
-                print("\t\t\t\t\t=======================================")
-
-                # Secim Bolumu
-                choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
-
-                if choose == 1:  # Musteri Ekleme
-                    os.system('cls')
-                    add_customer(customer_data)
-                elif choose == 2:  # Musteri Bilgisi Guncelleme
-                    os.system('cls')
-                    update_data(customer_data,
-                                customer_information_list, 1)
-                elif choose == 3:  # Musteri Aratma
-                    os.system('cls')
-                    search_data(customer_data, customer_information_list)
-                elif choose == 4:  # Musteri Listeleme
-                    os.system('cls')
-                    while True:
-                        list_data(customer_data, customer_information_list)
-                        choose_in_lists = input(
-                            "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
-                        if int(choose_in_lists) == 1:
-                            break
-                        elif int(choose_in_lists) == 2:
-                            continue
-                        else:
-                            print(
-                                "Hatali secim yaptiniz. Ana menuye donuluyor...")
-                            break
-
-                elif choose == 5:  # Musteri Silme
-                    os.system('cls')
-                    remove_customer(
-                        customer_data, customer_information_list, room_to_customer)
-                elif choose == 6:  # Oda Ucreti Hesapla
-                    calculate_room_fee(room_types)
-                elif choose == 7:
-                    print("\t\t\t\t\tAna menuye donuluyor...")
-                    os.system('cls')
-                    break
-                else:
-                    print(
-                        "\t\t\t\t\tHatali bir secim yaptiniz, secim ekranina yonlendiriliyorsunuz...")
-                    os.system('cls')
-                    continue
+            get_customer_menu()
         # Personel Menusu
         elif choose == 2:
-            os.system('cls')
-            while True:
-                # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t    Personel Bolumu" +
-                      "\n\t\t\t\t\t=======================================")
-
-                # Menu Maddeleri
-                for i in range(len(staff_menu)):
-                    print("\t\t\t\t\t| [{}] {}{}|".format(
-                        i+1, staff_menu[i], " "*(32-len(staff_menu[i]))))
-                    quit_number = i+2
-
-                # Cikis
-                print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
-                    quit_number, " "*(18)))
-
-                # Alt Cizgi
-                print("\t\t\t\t\t=======================================")
-
-                # Secim Bolumu
-                choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
-
-                if choose == 1:  # Personel Listeleme
-                    os.system('cls')
-                    while True:
-                        list_data(staff_data, staff_information_list)
-                        choose_in_lists = input(
-                            "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
-                        if int(choose_in_lists) == 1:
-                            break
-                        elif int(choose_in_lists) == 2:
-                            continue
-                        else:
-                            print(
-                                "Hatali secim yaptiniz. Ana menuye donuluyor...")
-                            break
-
-                elif choose == 2:  # Yeni Personel Ekleme
-                    os.system('cls')
-                    add_staff(staff_data)
-
-                elif choose == 3:  # Personel Bilgilerini Guncelleme
-                    os.system('cls')
-                    update_data(staff_data, staff_information_list, 2)
-
-                elif choose == 4:  # Personel Silme
-                    os.system('cls')
-                    remove_staff(staff_data, staff_information_list)
-
-                elif choose == 5:  # Personel Arama
-                    os.system('cls')
-                    search_data(staff_data, staff_information_list)
-
-                elif choose == 6:
-                    print("\t\t\t\t\tAna menuye donuluyor...")
-                    os.system('cls')
-                    break
-
-                else:
-                    print(
-                        "\t\t\t\t\tHatali bir secim yaptiniz, secim ekranina yonlendiriliyorsunuz...")
-                    os.system('cls')
-                    continue
+            get_staff_menu()
         # Oda Menusu
         elif choose == 3:
-
-            os.system('cls')
-            while True:
-                # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t       Oda Menusu" +
-                      "\n\t\t\t\t\t=======================================")
-
-                # Menu Maddeleri
-                for i in range(len(room_menu)):
-                    print("\t\t\t\t\t| [{}] {}{}|".format(
-                        i+1, room_menu[i], " "*(32-len(room_menu[i]))))
-                    quit_number = i+2
-
-                # Cikis
-                print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
-                    quit_number, " "*(18)))
-
-                # Alt Cizgi
-                print("\t\t\t\t\t=======================================")
-
-                # Secim Bolumu
-                choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
-                if choose == 1:  # Odalari Listele
-                    os.system('cls')
-                    while True:
-                        list_data(room_data, room_information_list)
-                        choose_in_lists = input(
-                            "1- Ana Menuye Don 2- Tekrar Listele.\nNe yapmak istediginizi seciniz:")
-                        if int(choose_in_lists) == 1:
-                            break
-                        elif int(choose_in_lists) == 2:
-                            continue
-                        else:
-                            print(
-                                "Hatali secim yaptiniz. Ana menuye donuluyor...")
-                            break
-                elif choose == 2:  # Yeni Oda Ekle
-                    os.system('cls')
-                    add_room(room_data)
-                elif choose == 3:
-                    os.system('cls')
-                    remove_room(room_data, room_information_list,
-                                room_to_customer, customer_data)
-                elif choose == 4:  # Oda Bilgisi Guncelle
-                    os.system('cls')
-                    update_data(room_data, room_information_list, 3)
-                elif choose == 5:  # Odadaki Musteri Bilgilerini Goruntule
-                    os.system('cls')
-                    get_customer_by_room_number(
-                        customer_data, customer_information_list, room_to_customer)
-                elif choose == 6:
-                    print("\t\t\t\t\tAna menuye donuluyor...")
-                    os.system('cls')
-                    break
+            get_room_menu()
         # Musteri Memnuniyeti Menusu
         elif choose == 4:
-
-            os.system('cls')
-            while True:
-                # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t  Musteri Memnuniyeti" +
-                      "\n\t\t\t\t\t=======================================")
-
-                # Menu Maddeleri
-                for i in range(len(feedback_menu)):
-                    print("\t\t\t\t\t| [{}] {}{}|".format(
-                        i+1, feedback_menu[i], " "*(32-len(feedback_menu[i]))))
-                    quit_number = i+2
-
-                # Cikis
-                print("\t\t\t\t\t| [{}] Ana Menuye Don{}|".format(
-                    quit_number, " "*(18)))
-
-                # Alt Cizgi
-                print("\t\t\t\t\t=======================================")
-
-                # Secim Bolumu
-                choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
-                if choose == 1:  # Geri Bildirim Formu Doldurma
-                    os.system('cls')
-                    fill_feedback_form(
-                        feedback_data, feedback_information_list)
-                elif choose == 2:  # Geri Bildirim Formlarini Listeleme
-                    os.system('cls')
-                    list_feedback_forms(
-                        feedback_data, feedback_information_list)
-                elif choose == 3:  # Memnuniyet Oranı
-                    os.system('cls')
-                    feedback_rate(feedback_data, feedback_information_list)
-                elif choose == 4:
-                    print("\t\t\t\t\tAna menuye donuluyor...")
-                    os.system('cls')
-                    break
+            get_feedback_menu()
         elif choose == 5:
             print("\t\t\t\t\tProgramdan cikiliyor...")
             break
@@ -696,10 +705,15 @@ def menus():
             continue
 
 
+def main():
+    read_room_to_customer()
+    get_menus()
+
+
 # Menü Verileri
 customer_menu = ["Odaya Musteri Ekle", "Musteri Bilgilerini Guncelle", "Musteri Ara",
                  "Musterileri Listele", "Musteriyi Sil", "Oda Ücreti Hesapla"]
-room_menu = ["Odalari Listele", "Oda Ekle", "Oda Sil",
+room_menu = ["Odalari Listele", "Oda Ekle",
              "Oda Bilgilerini Guncelle", "Odadaki Musteri Bilgileri"]
 staff_menu = ["Personelleri Listele", "Personel Ekle",
               "Personel Bilgisi Guncelle", "Personel Sil", "Personel Ara"]
@@ -718,25 +732,10 @@ feedback_information_list = ["ID", "Oda Puanlamasi",
                              "Hizmet Puanlamasi", "Temizlik Puanlamasi", "Personel Puanlamasi"]
 
 # Veriler
-customer_data = []
-staff_data = []
-room_data = []
-feedback_data = []
+customer_data, staff_data, room_data, feedback_data = initialize_data()
 room_to_customer = {}
 room_types = [[1, 80, "KUCUK"], [2, 100, "ORTA"],
               [3, 150, "BUYUK"], [4, 180, "LUKS"]]
 
-with open("customer_data_file.txt", "r") as customer_data_file:
-    customer_data = [(line.strip()).split() for line in customer_data_file]
 
-with open("staff_data_file.txt", "r") as staff_data_file:
-    staff_data = [(line.strip()).split() for line in staff_data_file]
-
-with open("room_data_file.txt", "r") as room_data_file:
-    room_data = [(line.strip()).split() for line in room_data_file]
-
-with open("feedback_data_file.txt", "r") as feedback_data_file:
-    feedback_data = [(line.strip()).split() for line in feedback_data_file]
-
-read_room_to_customer()
-menus()
+main()
