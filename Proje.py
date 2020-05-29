@@ -1,5 +1,7 @@
 import os
 
+# Oda Numarasina Gore Musteri Bilgilerini Gosterme
+
 
 def get_customer_by_room_number(data, information_list, room_to_customer):
 
@@ -30,6 +32,8 @@ def get_customer_by_room_number(data, information_list, room_to_customer):
             print("Hatali bir giris yaptiniz. Ana menuye donuluyor...")
             break
 
+# Odaya Gore Musteri Dosyasini Okuma
+
 
 def read_room_to_customer():
     with open("room_to_customer_file.txt", "r") as room_to_customer_file:
@@ -38,6 +42,8 @@ def read_room_to_customer():
 
             x = line.split(" ")
             room_to_customer[x[0]] = x[1]
+
+# Oda Ucreti Hesaplama
 
 
 def calculate_room_fee(room_types):
@@ -60,17 +66,69 @@ def calculate_room_fee(room_types):
             print("Hatali secim yaptiniz. Ana menuye donuluyor...")
             break
 
-
-def list_feedback_forms():
-    pass
+# Musteri Memnuniyeti Formlarini Listeleme
 
 
-def feedback_rate():
-    pass
+def list_feedback_forms(data, info):
+    for i in range(len(info)):
+        if i == 0:
+            print("{}{}".format(info[i], " "*4), end="")
+            continue
+        print("{}{}".format(
+            info[i], " "*(24-len(info[i]))), end="")
+    print("\n")
+
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if j == 0:
+                print("{}{}".format(data[i][j], " "*5), end="")
+                continue
+            print("{}{}  {}/5{}".format("|"*int(data[i][j]), "•"*(
+                5-int(data[i][j])), data[i][j], " "*(15-len(data[i][j]))), end="")
+        print("\n")
+    print("\n\n")
+
+# Musteri Memnuniyeti Orani
 
 
-def fill_feedback_form():
-    pass
+def feedback_rate(data, info):
+    for i in range(len(info)):
+        if i == 0:
+            continue
+        print("{}{}".format(
+            info[i], " "*(25-len(info[i]))), end="")
+    print("\n")
+    total = 0
+    customer_count = len(data)
+    for i in range(len(data[0])):
+        for j in range(len(data)):
+            if i == 0:
+                continue
+            total += int(data[j][i])
+        if i == 0:
+            continue
+        print("{:.2f}/100{}".format((100/(5*customer_count)) * total, " "*16), end="")
+        total = 0
+    print("\n\n")
+
+# Musteri Memnuniyeti Formu Ekleme
+
+
+def fill_feedback_form(data, info):
+    temp_data = []
+    temp_data.append(str(len(data)))
+    for i in range(len(info)):
+        if i == 0:
+            continue
+        temp_data.append(input(
+            "{} için minimum 1 maksimum 5 olmak üzere bir sayi girin:".format(info[i])))
+    data.append(temp_data)
+
+    with open("feedback_data_file.txt", "w") as feedback_data_file:
+        for i in range(len(data)):
+            for j in range(len(data[i])):
+                feedback_data_file.write(data[i][j] + " ")
+            feedback_data_file.write("\n")
 
 
 # Musteri Ekleme
@@ -183,12 +241,18 @@ def search_data(data, information_list):
 
 def list_data(data, information_list):
     for i in range(len(information_list)):
+        if i == 0:
+            print("{}{}".format(information_list[i], " "*4), end="")
+            continue
         print("{}{}".format(
             information_list[i], " "*(15-len(information_list[i]))), end="")
     print("\n")
 
     for i in range(len(data)):
         for j in range(len(data[i])):
+            if j == 0:
+                print("{}{}".format(data[i][j], " "*5), end="")
+                continue
             print("{}{}".format(data[i][j],
                                 " "*(15-len(data[i][j]))), end="")
         print("\n")
@@ -438,11 +502,9 @@ def menus():
                     os.system('cls')
                     remove_customer(
                         customer_data, customer_information_list, room_to_customer)
-                elif choose == 6:  # Geri Bildirim Formu Doldurma
-                    fill_feedback_form()
-                elif choose == 7:  # Oda Ucreti Hesapla
+                elif choose == 6:  # Oda Ucreti Hesapla
                     calculate_room_fee(room_types)
-                elif choose == 8:
+                elif choose == 7:
                     print("\t\t\t\t\tAna menuye donuluyor...")
                     os.system('cls')
                     break
@@ -521,7 +583,7 @@ def menus():
             os.system('cls')
             while True:
                 # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t    Oda Menusu" +
+                print("\t\t\t\t\t\t       Oda Menusu" +
                       "\n\t\t\t\t\t=======================================")
 
                 # Menu Maddeleri
@@ -576,7 +638,7 @@ def menus():
             os.system('cls')
             while True:
                 # Isim ve Ust Cizgi
-                print("\t\t\t\t\t\t    Musteri Memnuniyeti" +
+                print("\t\t\t\t\t\t  Musteri Memnuniyeti" +
                       "\n\t\t\t\t\t=======================================")
 
                 # Menu Maddeleri
@@ -594,13 +656,18 @@ def menus():
 
                 # Secim Bolumu
                 choose = int(input("\t\t\t\t\tSecim Yapiniz:"))
-                if choose == 1:  # Geri Bildirim Formlarini Listeleme
+                if choose == 1:  # Geri Bildirim Formu Doldurma
                     os.system('cls')
-                    list_feedback_forms()
-                elif choose == 2:  # Memnuniyet Oranı
+                    fill_feedback_form(
+                        feedback_data, feedback_information_list)
+                elif choose == 2:  # Geri Bildirim Formlarini Listeleme
                     os.system('cls')
-                    feedback_rate()
-                elif choose == 3:
+                    list_feedback_forms(
+                        feedback_data, feedback_information_list)
+                elif choose == 3:  # Memnuniyet Oranı
+                    os.system('cls')
+                    feedback_rate(feedback_data, feedback_information_list)
+                elif choose == 4:
                     print("\t\t\t\t\tAna menuye donuluyor...")
                     os.system('cls')
                     break
@@ -615,7 +682,7 @@ def menus():
 
 
 customer_menu = ["Odaya Musteri Ekle", "Musteri Bilgilerini Guncelle", "Musteri Ara",
-                 "Musterileri Listele", "Musteriyi Sil", "Geri Bildirim Formu Doldur", "Oda Ücreti Hesapla"]
+                 "Musterileri Listele", "Musteriyi Sil", "Oda Ücreti Hesapla"]
 customer_information_list = ["ID", "TC Kimlik No", "Ad",
                              "Soyad", "Yas", "Medeni Durum", "Cocuk Sayisi", "Oda Numarası"]
 staff_menu = ["Personelleri Listele", "Personel Ekle",
@@ -624,15 +691,17 @@ staff_information_list = ["ID", "TC Kimlik No", "Ad",
                           "Soyad", "Yas", "Departman"]
 room_menu = ["Odalari Listele", "Oda Ekle", "Oda Sil",
              "Oda Bilgilerini Guncelle", "Odadaki Musteri Bilgileri"]
-room_information_list = ["Oda ID", "Oda Türü", "Fiyat"]
-feedback_menu = ["Geri Bildirim Formlarini Listele",
+room_information_list = ["ID", "Oda Türü", "Fiyat"]
+feedback_menu = ["Geri Bildirim Formu Doldur", "Geri Bildirim Formlarini Listele",
                  "Otel Memnuniyet Oranlarini Gor"]
 hotel_menu = [[customer_menu, "Musteri Menusu"], [staff_menu, "Personel Menusu"], [
     room_menu, "Oda Menusu"], [feedback_menu, "Musteri Memnuniyeti Menusu"]]
+feedback_information_list = ["ID", "Oda Puanlamasi",
+                             "Hizmet Puanlamasi", "Temizlik Puanlamasi", "Personel Puanlamasi"]
 customer_data = []
 staff_data = []
 room_data = []
-feedback_data = {}
+feedback_data = []
 room_to_customer = {}
 room_types = [[1, 80, "KUCUK"], [2, 100, "ORTA"],
               [3, 150, "BUYUK"], [4, 180, "LUKS"]]
@@ -646,6 +715,9 @@ with open("staff_data_file.txt", "r") as staff_data_file:
 
 with open("room_data_file.txt", "r") as room_data_file:
     room_data = [(line.strip()).split() for line in room_data_file]
+
+with open("feedback_data_file.txt", "r") as feedback_data_file:
+    feedback_data = [(line.strip()).split() for line in feedback_data_file]
 
 read_room_to_customer()
 
