@@ -41,11 +41,24 @@ def read_room_to_customer():
 
 
 def calculate_room_fee(room_types):
-    room_type = input(
-        "1-Kucuk / 80 TL \t 2-Orta / 100 TL \t 3-Buyuk / 150 TL \t 4-Luks / 180 TL \nOda Türünü Giriniz:")
-    day_to_stay = input("Kalınacak Gun Sayısını Giriniz:")
-    print("{} Tipindeki Odada {} Gun Kalmanın Ücreti = {} TL" .format(
-        room_types[int(room_type)-1][0], day_to_stay, int(room_types[int(room_type)-1][1])*int(day_to_stay)))
+    while True:
+        room_type = input(
+            "1-Kucuk / 80 TL \t 2-Orta / 100 TL \t 3-Buyuk / 150 TL \t 4-Luks / 180 TL \nOda Türünü Giriniz:")
+        day_to_stay = input("Kalınacak Gun Sayısını Giriniz:")
+        print("{} Tipindeki Odada {} Gun Kalmanın Ücreti = {} TL" .format(
+            room_types[int(room_type)-1][0], day_to_stay, int(room_types[int(room_type)-1][1])*int(day_to_stay)))
+
+        choose = int(
+            input("1-Ana Menuye Don \t 2-Tekrar Ucret Hesapla\nLutfen seciminizi yapiniz:"))
+        if choose == 1:
+            print("Ana menuye donuluyor...")
+            break
+        elif choose == 2:
+            print("Tekrar arama isi baslatiliyor...")
+            continue
+        else:
+            print("Hatali secim yaptiniz. Ana menuye donuluyor...")
+            break
 
 
 def list_feedback_forms():
@@ -621,7 +634,8 @@ staff_data = []
 room_data = []
 feedback_data = {}
 room_to_customer = {}
-room_types = [[1, 80], [2, 100], [3, 150], [4, 180]]
+room_types = [[1, 80, "KUCUK"], [2, 100, "ORTA"],
+              [3, 150, "BUYUK"], [4, 180, "LUKS"]]
 
 # Dosyalari iceri aktarma
 with open("customer_data_file.txt", "r") as customer_data_file:
