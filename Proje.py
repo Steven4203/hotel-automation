@@ -19,8 +19,34 @@ def write_customer_data_file(customer_data):
                 customer_data_file.write(customer_data[i][j] + " ")
             customer_data_file.write("\n")
 
+# staff_data_file dosyasini yeniden yazma
+
+
+def write_feedback_data_file(feedback_data):
+    with open("feedback_data_file.txt", "w") as feedback_data_file:
+        for i in range(len(feedback_data)):
+            for j in range(len(feedback_data[i])):
+                feedback_data_file.write(feedback_data[i][j] + " ")
+            feedback_data_file.write("\n")
+
+
+def write_staff_data_file(staff_data):
+    with open("staff_data_file.txt", "w") as staff_data_file:
+        for i in range(len(staff_data)):
+            for j in range(len(staff_data[i])):
+                staff_data_file.write(staff_data[i][j] + " ")
+            staff_data_file.write("\n")
+
+
+def write_room_data_file(room_data):
+    with open("room_data_file.txt", "w") as room_data_file:
+        for i in range(len(room_data)):
+            for j in range(len(room_data[i])):
+                room_data_file.write(room_data[i][j] + " ")
+            room_data_file.write("\n")
 
 # Dosyalari Okuma
+
 
 def initialize_data():
     with open("customer_data_file.txt", "r") as customer_data_file:
@@ -165,17 +191,13 @@ def fill_feedback_form(data, info):
         temp_data.append(input(
             "{} için minimum 1 maksimum 5 olmak üzere bir sayi girin:".format(info[i])))
     data.append(temp_data)
+    write_feedback_data_file(feedback_data)
 
-    with open("feedback_data_file.txt", "w") as feedback_data_file:
-        for i in range(len(data)):
-            for j in range(len(data[i])):
-                feedback_data_file.write(data[i][j] + " ")
-            feedback_data_file.write("\n")
 
 # Musteri Ekleme
 
 
-def add_customer(data):
+def add_customer(data, room_to_customer):
     temp_data = []
     temp_data.append(str(len(data)))
     temp_data.append(input("Musterinin TC Nosunu Giriniz:"))
@@ -195,12 +217,9 @@ def add_customer(data):
     room_number = input("Musteriyi eklemek isteginiz odayi giriniz:")
     temp_data.append(room_number)
     data.append(temp_data)
+    room_to_customer[room_number] = temp_data[0]
     write_customer_data_file(data)
-
-    with open("room_to_customer_file.txt", "a") as room_to_customer_file:
-        room_to_customer_file.write(
-            "\n" + room_number + " " + temp_data[0])
-
+    write_room_to_customer_file(room_to_customer)
     print("Musteri Basariyla Eklendi. Musteri Menusune Donuluyor...")
 
 # Personel Ekleme
@@ -217,11 +236,7 @@ def add_staff(data):
     temp_data.append(input("Personelin Yasini Giriniz:"))
     temp_data.append(input("Personelin Calisacagi Departmanin Adini Giriniz:"))
     data.append(temp_data)
-    with open("staff_data_file.txt", "w") as staff_data_file:
-        for i in range(len(data)):
-            for j in range(len(data[i])):
-                staff_data_file.write(data[i][j] + " ")
-            staff_data_file.write("\n")
+    write_staff_data_file(data)
     print("Personel Basariyla Eklendi. Musteri Menusune Donuluyor...")
 
 # Oda Ekleme
@@ -233,11 +248,7 @@ def add_room(data):
     temp_data.append(input("Oda türünü giriniz:"))
     temp_data.append(input("Oda fiyatini giriniz giriniz:"))
     data.append(temp_data)
-    with open("room_data_file.txt", "w") as room_data_file:
-        for i in range(len(data)):
-            for j in range(len(data[i])):
-                room_data_file.write(data[i][j] + " ")
-            room_data_file.write("\n")
+    write_room_data_file(data)
     print("Oda Basariyla Eklendi. Oda Menusune Donuluyor...")
 
 # Arama Fonksiyonu +
@@ -249,7 +260,6 @@ def search_data(data, information_list):
         for i in range(len(information_list)):
             print("[{}] - {}'a Gore Ara".format(i +
                                                 1, information_list[i]), end="\t")
-
         search_type = int(input("\nArama Turunu Giriniz:"))-1
         search_keywords = input("{} Giriniz:".format(
             information_list[search_type]))
@@ -310,8 +320,7 @@ def update_data(data, information_list, x):
         control = 0
         for i in range(len(information_list)):  # Guncellenebilecek Bilgileri Gosterir
             print("[{}] - {}".format(i+1, information_list[i]), end="\t")
-        id_choose = int(
-            input("\nDegistirmek istediginiz ID'yi giriniz:"))
+        id_choose = int(input("\nDegistirmek istediginiz ID'yi giriniz:"))
         for i in range(len(data)):
             if int(data[i][0]) == int(id_choose):
                 choose = int(
@@ -329,25 +338,13 @@ def update_data(data, information_list, x):
         # Dosyayi yeniden yazar
         if control == 1:
             if x == 1:
-                with open("customer_data_file.txt", "w") as customer_data_file:
-                    for i in range(len(data)):
-                        for j in range(len(data[i])):
-                            customer_data_file.write(data[i][j] + " ")
-                        customer_data_file.write("\n")
+                write_customer_data_file(data)
 
             elif x == 2:
-                with open("staff_data_file.txt", "w") as staff_data_file:
-                    for i in range(len(data)):
-                        for j in range(len(data[i])):
-                            staff_data_file.write(data[i][j] + " ")
-                        staff_data_file.write("\n")
+                write_staff_data_file(data)
 
             elif x == 3:
-                with open("room_data_file.txt", "w") as room_data_file:
-                    for i in range(len(data)):
-                        for j in range(len(data[i])):
-                            room_data_file.write(data[i][j] + " ")
-                        room_data_file.write("\n")
+                write_room_data_file(data)
 
             print("Bilgi Basariyla Guncellendi. Menuye Donuluyor...")
             break
@@ -365,9 +362,8 @@ def find_id(data, temp_id):
             return i
     return None
 
+
 # Personelin Calistigi Bolumu "BOS" Yapar
-
-
 def remove_staffs_department_information(data, temp_id):
     staff_id = find_id(data, temp_id)
     if staff_id == None:
@@ -375,6 +371,8 @@ def remove_staffs_department_information(data, temp_id):
     else:
         data[staff_id][5] = "BOS"
         return True
+
+# Personel Silme
 
 
 def remove_staff(data, information_list):
@@ -396,6 +394,8 @@ def remove_staff(data, information_list):
             print("Arattiginiz ID Bulunamadi. Lutfen tekrar deneyiniz...")
             continue
 
+# Musteri Oda Bilgisini Siler
+
 
 def remove_customers_room_information(data, temp_id):
     customer_id = find_id(data, temp_id)
@@ -405,6 +405,8 @@ def remove_customers_room_information(data, temp_id):
         data[customer_id][7] = "-"
         return True
 
+# Musterinin Odasini Bulur
+
 
 def find_customers_room(customer_id, room_to_customer):
     keys = list(room_to_customer.keys())
@@ -412,6 +414,8 @@ def find_customers_room(customer_id, room_to_customer):
         if int(room_to_customer[keys[i]]) == int(customer_id):
             return keys[i]
     return None
+
+# Musteri Silme
 
 
 def remove_customer(data, information_list, room_to_customer):
@@ -424,7 +428,14 @@ def remove_customer(data, information_list, room_to_customer):
 
             # Eger Oda Bulunursa Odadaki Musteri Bilgilerini Siler
             room_id = find_customers_room(temp_id, room_to_customer)
-            room_to_customer.pop(room_id)
+            try:
+                room_to_customer.pop(room_id)
+            except KeyError:
+                print(
+                    "Silmek istediginiz müşteri halihazırda bir odada bulunmuyor. Tekrar Deneyiniz...")
+                continue
+            else:
+                pass
 
            # Dosyalari yeniden yazar
             write_customer_data_file(data)
@@ -440,7 +451,9 @@ def remove_customer(data, information_list, room_to_customer):
 # Menüler
 
 
-def get_customer_menu():
+def get_customer_menu(customer_menu):
+    customer_information_list = ["ID", "TC Kimlik No", "Ad",
+                                 "Soyad", "Yas", "Medeni Durum", "Cocuk Sayisi", "Oda Numarası"]
     os.system('cls')
     while True:
         # Isim ve Ust Cizgi
@@ -465,7 +478,7 @@ def get_customer_menu():
 
         if choose == 1:  # Musteri Ekleme
             os.system('cls')
-            add_customer(customer_data)
+            add_customer(customer_data, room_to_customer)
         elif choose == 2:  # Musteri Bilgisi Guncelleme
             os.system('cls')
             update_data(customer_data,
@@ -505,7 +518,9 @@ def get_customer_menu():
             continue
 
 
-def get_staff_menu():
+def get_staff_menu(staff_menu):
+    staff_information_list = ["ID", "TC Kimlik No", "Ad",
+                              "Soyad", "Yas", "Departman"]
     os.system('cls')
     while True:
         # Isim ve Ust Cizgi
@@ -571,7 +586,10 @@ def get_staff_menu():
             continue
 
 
-def get_room_menu():
+def get_room_menu(room_menu):
+    customer_information_list = ["ID", "TC Kimlik No", "Ad",
+                                 "Soyad", "Yas", "Medeni Durum", "Cocuk Sayisi", "Oda Numarası"]
+    room_information_list = ["ID", "Oda Türü", "Fiyat"]
     os.system('cls')
     while True:
         # Isim ve Ust Cizgi
@@ -623,7 +641,9 @@ def get_room_menu():
             break
 
 
-def get_feedback_menu():
+def get_feedback_menu(feedback_menu):
+    feedback_information_list = ["ID", "Oda Puanlamasi",
+                                 "Hizmet Puanlamasi", "Temizlik Puanlamasi", "Personel Puanlamasi"]
     os.system('cls')
     while True:
         # Isim ve Ust Cizgi
@@ -662,7 +682,23 @@ def get_feedback_menu():
             break
 
 
-def get_menus():
+def main():
+    # room_to_customer dosyasini okur
+    read_room_to_customer()
+
+    # Menü Verileri
+
+    customer_menu = ["Odaya Musteri Ekle", "Musteri Bilgilerini Guncelle", "Musteri Ara",
+                     "Musterileri Listele", "Musteriyi Sil", "Oda Ücreti Hesapla"]
+    room_menu = ["Odalari Listele", "Oda Ekle",
+                 "Oda Bilgilerini Guncelle", "Odadaki Musteri Bilgileri"]
+    staff_menu = ["Personelleri Listele", "Personel Ekle",
+                  "Personel Bilgisi Guncelle", "Personel Sil", "Personel Ara"]
+    feedback_menu = ["Geri Bildirim Formu Doldur", "Geri Bildirim Formlarini Listele",
+                     "Otel Memnuniyet Oranlarini Gor"]
+    hotel_menu = [[customer_menu, "Musteri Menusu"], [staff_menu, "Personel Menusu"], [
+        room_menu, "Oda Menusu"], [feedback_menu, "Musteri Memnuniyeti Menusu"]]
+
     while True:
         # Isim ve Ust Cizgi
         print("\t\t\t\t\t\t    OTEL OTOMASYONU" +
@@ -685,16 +721,16 @@ def get_menus():
 
         # Musteri Menusu
         if choose == 1:
-            get_customer_menu()
+            get_customer_menu(customer_menu)
         # Personel Menusu
         elif choose == 2:
-            get_staff_menu()
+            get_staff_menu(staff_menu)
         # Oda Menusu
         elif choose == 3:
-            get_room_menu()
+            get_room_menu(room_menu)
         # Musteri Memnuniyeti Menusu
         elif choose == 4:
-            get_feedback_menu()
+            get_feedback_menu(feedback_menu)
         elif choose == 5:
             print("\t\t\t\t\tProgramdan cikiliyor...")
             break
@@ -704,32 +740,6 @@ def get_menus():
             os.system('cls')
             continue
 
-
-def main():
-    read_room_to_customer()
-    get_menus()
-
-
-# Menü Verileri
-customer_menu = ["Odaya Musteri Ekle", "Musteri Bilgilerini Guncelle", "Musteri Ara",
-                 "Musterileri Listele", "Musteriyi Sil", "Oda Ücreti Hesapla"]
-room_menu = ["Odalari Listele", "Oda Ekle",
-             "Oda Bilgilerini Guncelle", "Odadaki Musteri Bilgileri"]
-staff_menu = ["Personelleri Listele", "Personel Ekle",
-              "Personel Bilgisi Guncelle", "Personel Sil", "Personel Ara"]
-feedback_menu = ["Geri Bildirim Formu Doldur", "Geri Bildirim Formlarini Listele",
-                 "Otel Memnuniyet Oranlarini Gor"]
-hotel_menu = [[customer_menu, "Musteri Menusu"], [staff_menu, "Personel Menusu"], [
-    room_menu, "Oda Menusu"], [feedback_menu, "Musteri Memnuniyeti Menusu"]]
-
-# Bilgiler
-customer_information_list = ["ID", "TC Kimlik No", "Ad",
-                             "Soyad", "Yas", "Medeni Durum", "Cocuk Sayisi", "Oda Numarası"]
-staff_information_list = ["ID", "TC Kimlik No", "Ad",
-                          "Soyad", "Yas", "Departman"]
-room_information_list = ["ID", "Oda Türü", "Fiyat"]
-feedback_information_list = ["ID", "Oda Puanlamasi",
-                             "Hizmet Puanlamasi", "Temizlik Puanlamasi", "Personel Puanlamasi"]
 
 # Veriler
 customer_data, staff_data, room_data, feedback_data = initialize_data()
